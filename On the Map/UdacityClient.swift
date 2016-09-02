@@ -72,6 +72,41 @@ class UdacityClient : NSObject {
         task.resume()
     }
     
+    
+    func getStudentLocationsRequest( completionHandler: (success: Bool, studentLocations:[[String:AnyObject]], errorString: String?) -> Void) {
+        
+        let request = NSMutableURLRequest(URL: NSURL(string: "https://parse.udacity.com/parse/classes/StudentLocation?limit=100")!)
+        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        let session = NSURLSession.sharedSession()
+        
+        let task = session.dataTaskWithRequest(request) { data, response, error in
+            if error != nil {
+                completionHandler(success: false, studentLocations:[[:]], errorString: "Error Retrieving Student Locations")
+                return
+            }
+            
+            let parsedResult: AnyObject!
+            
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as? [String:AnyObject]
+            } catch {
+                print("Could not parse the data as JSON: '\(data)'")
+                return
+            }
+            
+            print(parsedResult)
+            
+            guard let studentLocations = parsedResult["results"] as? [[String:AnyObject]] else {
+                print("no account found")
+                return
+            }
+            completionHandler(success: true, studentLocations:studentLocations, errorString: nil)
+        }
+        task.resume()
+    }
+    
+    
     func getUserData(uniqueKey:String, completionHandler: (firstName: String, lastName:String, errorString: String?) -> Void){
         let request = NSMutableURLRequest(URL: NSURL(string: "https://www.udacity.com/api/users/"+uniqueKey)!)
         let session = NSURLSession.sharedSession()

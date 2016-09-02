@@ -13,7 +13,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate{
     @IBOutlet weak var userNameTextField: UITextField!
     @IBOutlet weak var passwrodTextField: UITextField!
     
-    var user:Students?
     var uniqueKey:String?
     
     override func viewDidLoad() {
@@ -65,7 +64,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate{
         alert.addAction(UIAlertAction(title: "Click", style: UIAlertActionStyle.Default, handler: nil))
         self.presentViewController(alert, animated: true, completion: nil)
     }
-    
     
     @IBAction func signUpButton(sender: AnyObject) {
         if let url = NSURL(string: "https://www.udacity.com/account/auth#!/signup") {

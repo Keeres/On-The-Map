@@ -19,54 +19,24 @@ class MapViewController: UIViewController, MKMapViewDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
-
-        getStudentLocationsRequest()
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MapViewController.updateUserAnnotation(_:)),name:"update", object: nil)
+        
+        getStudentLocations()
         
         let defaults = NSUserDefaults.standardUserDefaults()
         uniqueKey = defaults.objectForKey("uniqueKey") as? String
-        
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MapViewController.updateUserAnnotation(_:)),name:"update", object: nil)
-
+    }
+    
+    func getStudentLocations(){
+        UdacityClient.sharedInstance().getStudentLocationsRequest(){(success, studentLocations, errorString) in
+            if success {
+                self.addAnnotations(studentLocations)
+            } else {
+                performUIUpdatesOnMain(){
+                    AlertView.displayError(self, error: errorString!)
+                }
+            }
         }
-
-    func getStudentLocationsRequest(){
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://parse.udacity.com/parse/classes/StudentLocation?limit=100")!)
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
-        let session = NSURLSession.sharedSession()
-        
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            if error != nil {
-                print(error)
-                
-                let alert = UIAlertController(title:nil , message: "Error Downloading Student Information", preferredStyle: UIAlertControllerStyle.Alert)
-                alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
-                
-                self.presentViewController(alert, animated: true, completion: nil)
-
-                return
-            }
-          //  print(NSString(data: data!, encoding: NSUTF8StringEncoding))
-            
-            let parsedResult: AnyObject!
-
-            do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as? [String:AnyObject]
-            } catch {
-                print("Could not parse the data as JSON: '\(data)'")
-                return
-            }
-                
-          //print(parsedResult)
-            
-            guard let studentInformation = parsedResult["results"] as? [[String:AnyObject]] else {
-                print("no account found")
-                return
-            }
-         //   print(studentInformation)
-          self.addAnnotations(studentInformation)
-        }
-        task.resume()
     }
     
     func addAnnotations(studentInformation: [[String : AnyObject]]){

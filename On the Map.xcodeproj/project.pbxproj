@@ -10,6 +10,7 @@
 		AD3C28211CC0286E00438C95 /* AddLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3C28201CC0286E00438C95 /* AddLocationViewController.swift */; };
 		AD3C28231CC2981E00438C95 /* MyLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3C28221CC2981E00438C95 /* MyLocationViewController.swift */; };
 		AD4BBCE01CBAED5C00E2FDB7 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4BBCDF1CBAED5C00E2FDB7 /* MapViewController.swift */; };
+		AD7B82B51D7A4528002C3D57 /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7B82B41D7A4528002C3D57 /* AlertView.swift */; };
 		ADBC30FB1CBAEAE900CE819A /* GCDBlackBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADBC30FA1CBAEAE900CE819A /* GCDBlackBox.swift */; };
 		ADF300211CBC06FD0019FF2B /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADF300201CBC06FD0019FF2B /* TableViewController.swift */; };
 		ADF300231CBC09AA0019FF2B /* Students.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADF300221CBC09AA0019FF2B /* Students.swift */; };
@@ -45,6 +46,7 @@
 		AD3C28201CC0286E00438C95 /* AddLocationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddLocationViewController.swift; sourceTree = "<group>"; };
 		AD3C28221CC2981E00438C95 /* MyLocationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyLocationViewController.swift; sourceTree = "<group>"; };
 		AD4BBCDF1CBAED5C00E2FDB7 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		AD7B82B41D7A4528002C3D57 /* AlertView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertView.swift; sourceTree = "<group>"; };
 		ADBC30FA1CBAEAE900CE819A /* GCDBlackBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GCDBlackBox.swift; sourceTree = "<group>"; };
 		ADF300201CBC06FD0019FF2B /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		ADF300221CBC09AA0019FF2B /* Students.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Students.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				AD3C28201CC0286E00438C95 /* AddLocationViewController.swift */,
 				AD3C28221CC2981E00438C95 /* MyLocationViewController.swift */,
 				ADF300221CBC09AA0019FF2B /* Students.swift */,
+				AD7B82B41D7A4528002C3D57 /* AlertView.swift */,
 				ADF4BC5F1CB6C7D6009E0FAA /* Main.storyboard */,
 				ADF4BC621CB6C7D6009E0FAA /* Assets.xcassets */,
 				ADF4BC641CB6C7D6009E0FAA /* LaunchScreen.storyboard */,
@@ -291,6 +294,7 @@
 				ADF4BC5E1CB6C7D6009E0FAA /* LogInViewController.swift in Sources */,
 				ADF300211CBC06FD0019FF2B /* TableViewController.swift in Sources */,
 				AD4BBCE01CBAED5C00E2FDB7 /* MapViewController.swift in Sources */,
+				AD7B82B51D7A4528002C3D57 /* AlertView.swift in Sources */,
 				AD3C28231CC2981E00438C95 /* MyLocationViewController.swift in Sources */,
 				ADF300231CBC09AA0019FF2B /* Students.swift in Sources */,
 				AD3C28211CC0286E00438C95 /* AddLocationViewController.swift in Sources */,
