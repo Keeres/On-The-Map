@@ -41,37 +41,35 @@ class LoginViewController: UIViewController, UITextFieldDelegate{
                 
                 UdacityClient.sharedInstance().getUserData(key) {(firstName, LastName, errorString) in
                     let defaults = NSUserDefaults.standardUserDefaults()
-                
+                    
                     defaults.setObject(key, forKey: "uniqueKey")
                     defaults.setObject(firstName, forKey: "firstName")
                     defaults.setObject(LastName, forKey: "lastName")
-//                    NSUserDefaults.standardUserDefaults().synchronize()
-
-                    print(defaults.objectForKey("firstName") as! String)
+                    
+                  //  print(defaults.objectForKey("firstName") as! String)
                     performUIUpdatesOnMain(){
-                     //   let controller = self.storyboard!.instantiateViewControllerWithIdentifier("TabBar") as! UITabBarController
-                        
-                       // self.presentViewController(controller, animated: true, completion: nil)
                         self.performSegueWithIdentifier("MapView", sender: nil)
                     }
                 }
-            }else {
-                print("Unable to Log In")
+            } else {
+                performUIUpdatesOnMain(){
+                    self.displayError(errorString!)
+                }
             }
         }
     }
     
+    // MARK: Display Error
+    func displayError(error:String){
+        let alert = UIAlertController(title: "Alert", message: error, preferredStyle: UIAlertControllerStyle.Alert)
+        alert.addAction(UIAlertAction(title: "Click", style: UIAlertActionStyle.Default, handler: nil))
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    
     @IBAction func signUpButton(sender: AnyObject) {
         if let url = NSURL(string: "https://www.udacity.com/account/auth#!/signup") {
             UIApplication.sharedApplication().openURL(url)
-        }
-    }
-    
-    // MARK: Error
-    //change to an alert view with error message: incorrect log in info later
-    private func displayError(errorString: String?) {
-        if let errorString = errorString {
-           print(errorString)
         }
     }
     

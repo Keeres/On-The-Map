@@ -6,7 +6,7 @@
 //  Copyright © 2016 Steven Chen. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 class UdacityClient : NSObject {
 
@@ -21,38 +21,53 @@ class UdacityClient : NSObject {
         let session = NSURLSession.sharedSession()
         let task = session.dataTaskWithRequest(request) {data, response, error in
             if error != nil { // Handle error…
+                completionHandler(success: false, ID:" ", errorString: "Failure to Connect")
                 return
             }
          
             let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5)) /* subset response data! */
+            guard let httpResponse = response as? NSHTTPURLResponse else {
+                print("error: not a valid http response")
+                return
+            }
+            print(httpResponse.statusCode)
             
-            let parsedResult: AnyObject!
-
-            do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(newData, options: .AllowFragments)
-            } catch {
-                print("Could not parse the data as JSON: '\(data)'")
+            switch (httpResponse.statusCode) {
+            case 400:
+                completionHandler(success: false, ID:" ", errorString: "Please enter an username or password")
                 
-                return
-            }
-            print(parsedResult)
-            guard let account = parsedResult[UdacityClient.ResponseKey.Account] as? [String:AnyObject] else {
-                print("no account found")
-                return
-            }
-            print(account)
-            guard let registered = account[UdacityClient.ResponseKey.Registered] as? Bool else {
-                print("account not found")
-                return
-            }
+            case 403:
+                completionHandler(success: false, ID:" ", errorString: "Invalid username or password")
 
-            guard let key = account[UdacityClient.ResponseKey.Key] as? String else {
-                print("key not found")
-                return
+            default:
+                let parsedResult: AnyObject!
+                
+                do {
+                    parsedResult = try NSJSONSerialization.JSONObjectWithData(newData, options: .AllowFragments)
+                } catch {
+                    print("Error parsing JSON data '\(data)'")
+                    
+                    return
+                }
+                print(parsedResult)
+                guard let account = parsedResult[UdacityClient.ResponseKey.Account] as? [String:AnyObject] else {
+                    print("error locating account")
+                    return
+                }
+                print(account)
+                guard let registered = account[UdacityClient.ResponseKey.Registered] as? Bool else {
+                    print("account not registered")
+                    return
+                }
+                
+                guard let key = account[UdacityClient.ResponseKey.Key] as? String else {
+                    print("key not found")
+                    return
+                }
+                
+                completionHandler(success: registered, ID:key, errorString: "no error")
             }
-           
-            print(account)
-            completionHandler(success: registered, ID:key, errorString: "no error")
+          
         }
         task.resume()
     }
@@ -98,7 +113,7 @@ class UdacityClient : NSObject {
     
     func queryForExistingData(uniqueKey:String, completionHandler: (success: Bool, objectId:String, errorString: String?) -> Void){
      
-        let urlString = "https://api.parse.com/1/classes/StudentLocation?where=%7B%22uniqueKey%22%3A%22\(uniqueKey)%22%7D"
+        let urlString = "https://parse.udacity.com/parse/classes/StudentLocation?where=%7B%22uniqueKey%22%3A%22\(uniqueKey)%22%7D"
         let url = NSURL(string: urlString)
         print(url)
         let request = NSMutableURLRequest(URL: url!)
@@ -156,7 +171,6 @@ class UdacityClient : NSObject {
         
         return components.URL!
     }
-    
     
     // MARK: Shared Instance
     class func sharedInstance() -> UdacityClient {
