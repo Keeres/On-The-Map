@@ -72,6 +72,46 @@ class UdacityClient : NSObject {
         task.resume()
     }
     
+    func getUserData(uniqueKey:String, completionHandler: (success: Bool, firstName: String, lastName:String, errorString: String?) -> Void){
+        let request = NSMutableURLRequest(URL: NSURL(string: "https://www.udacity.com/api/users/"+uniqueKey)!)
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request) { data, response, error in
+            if error != nil { // Handle error...
+                completionHandler(success: false, firstName: " ",lastName: " ", errorString: "Error Retrieving User Information")
+                return
+            }
+            
+            let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5)) /* subset response data! */
+            let parsedResult: AnyObject!
+            
+            do {
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(newData, options: .AllowFragments)
+            } catch {
+                print("Could not parse the data as JSON: '\(data)'")
+                
+                return
+            }
+            
+            guard let user = parsedResult["user"] as? [String:AnyObject] else {
+                print("User info not found")
+                return
+            }
+            
+            guard let firstName = user["first_name"] as? String else {
+                print("First name not found")
+                return
+            }
+            
+            guard let lastName = user["last_name"] as? String else {
+                print("Last name not found")
+                return
+            }
+            
+            completionHandler(success: true, firstName: firstName, lastName: lastName, errorString: nil)
+        }
+        task.resume()
+    }
+
     
     func getStudentLocationsRequest( completionHandler: (success: Bool, studentLocations:[[String:AnyObject]], errorString: String?) -> Void) {
         
@@ -107,44 +147,6 @@ class UdacityClient : NSObject {
     }
     
     
-    func getUserData(uniqueKey:String, completionHandler: (firstName: String, lastName:String, errorString: String?) -> Void){
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://www.udacity.com/api/users/"+uniqueKey)!)
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            if error != nil { // Handle error...
-                return
-            }
-            let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5)) /* subset response data! */
-            
-            let parsedResult: AnyObject!
-            
-            do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(newData, options: .AllowFragments)
-            } catch {
-                print("Could not parse the data as JSON: '\(data)'")
-                
-                return
-            }
-            
-            guard let user = parsedResult["user"] as? [String:AnyObject] else {
-                print("User info not found")
-                return
-            }
-
-            guard let firstName = user["first_name"] as? String else {
-                print("First name not found")
-                return
-            }
-            
-            guard let lastName = user["last_name"] as? String else {
-                print("Last name not found")
-                return
-            }
-
-            completionHandler(firstName: firstName, lastName: lastName, errorString: nil)
-        }
-        task.resume()
-    }
     
     func queryForExistingData(uniqueKey:String, completionHandler: (success: Bool, objectId:String, errorString: String?) -> Void){
      

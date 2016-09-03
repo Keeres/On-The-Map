@@ -38,31 +38,29 @@ class LoginViewController: UIViewController, UITextFieldDelegate{
         UdacityClient.sharedInstance().authentiation(userNameTextField.text!, password: passwrodTextField.text!){ (success, key,errorString) in
             if success {
                 
-                UdacityClient.sharedInstance().getUserData(key) {(firstName, LastName, errorString) in
-                    let defaults = NSUserDefaults.standardUserDefaults()
-                    
-                    defaults.setObject(key, forKey: "uniqueKey")
-                    defaults.setObject(firstName, forKey: "firstName")
-                    defaults.setObject(LastName, forKey: "lastName")
-                    
-                  //  print(defaults.objectForKey("firstName") as! String)
-                    performUIUpdatesOnMain(){
-                        self.performSegueWithIdentifier("MapView", sender: nil)
+                UdacityClient.sharedInstance().getUserData(key) {(success, firstName, LastName, errorString) in
+                    if success {
+                        
+                        let defaults = NSUserDefaults.standardUserDefaults()
+                        
+                        defaults.setObject(key, forKey: "uniqueKey")
+                        defaults.setObject(firstName, forKey: "firstName")
+                        defaults.setObject(LastName, forKey: "lastName")
+                        
+                        //  print(defaults.objectForKey("firstName") as! String)
+                        performUIUpdatesOnMain(){
+                            self.performSegueWithIdentifier("MapView", sender: nil)
+                        }
+                    }else{
+                        AlertView.displayError(self, error: errorString!)
                     }
                 }
-            } else {
+            }else {
                 performUIUpdatesOnMain(){
-                    self.displayError(errorString!)
+                    AlertView.displayError(self, error: errorString!)
                 }
             }
         }
-    }
-    
-    // MARK: Display Error
-    func displayError(error:String){
-        let alert = UIAlertController(title: "Alert", message: error, preferredStyle: UIAlertControllerStyle.Alert)
-        alert.addAction(UIAlertAction(title: "Click", style: UIAlertActionStyle.Default, handler: nil))
-        self.presentViewController(alert, animated: true, completion: nil)
     }
     
     @IBAction func signUpButton(sender: AnyObject) {

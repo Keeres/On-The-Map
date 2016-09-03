@@ -15,6 +15,9 @@ class MapViewController: UIViewController, MKMapViewDelegate{
     @IBOutlet weak var mapView: MKMapView!
     var user:Students?
     var uniqueKey:String?
+    var students = [StudentInformation]()
+    var addStudent = true
+    let keys = ["createdAt", "firstName", "lastName", "latitude", "longitude", "mapString", "mediaURL", "objectId", "uniqueKey", "updatedAt"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +33,7 @@ class MapViewController: UIViewController, MKMapViewDelegate{
     func getStudentLocations(){
         UdacityClient.sharedInstance().getStudentLocationsRequest(){(success, studentLocations, errorString) in
             if success {
-                self.addAnnotations(studentLocations)
+                self.parseStudentInformation(studentLocations)
             } else {
                 performUIUpdatesOnMain(){
                     AlertView.displayError(self, error: errorString!)
@@ -38,6 +41,34 @@ class MapViewController: UIViewController, MKMapViewDelegate{
             }
         }
     }
+    
+    func parseStudentInformation(studentInformation: [[String : AnyObject]]){
+        for dictionary in studentInformation {
+            
+            // Checks to see if all required information are present with correct keys
+            if Array(dictionary.keys).count == 10{
+                let sortedKeys = Array(dictionary.keys).sort(<)
+                
+                for index in 0...sortedKeys.count-1{
+                    if(sortedKeys[index] != keys[index]){
+                        
+                        print("Incorrect key detected - key in question: \(sortedKeys[index]) key required - \(keys[index])")
+                        addStudent = false
+                    }
+                }
+            }else{
+                print("Missing required information for student")
+                addStudent = false
+            }
+            
+            if addStudent == true {
+                let student = StudentInformation(studentDictionary: dictionary)
+                students.append(student)
+            }
+            addStudent = true
+        }
+    }
+
     
     func addAnnotations(studentInformation: [[String : AnyObject]]){
         var annotations = [MKAnnotation]()
