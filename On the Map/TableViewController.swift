@@ -61,12 +61,16 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let indexPath = tableView.indexPathForSelectedRow!
         let student = Students.students![indexPath.row]
-
+        
         if let url = student.mediaURL{
             if student.mediaURL.hasPrefix("http://") {
-                UIApplication.sharedApplication().openURL(NSURL(string: url)!)
+                if UIApplication.sharedApplication().canOpenURL(NSURL(string: url)!){
+                    UIApplication.sharedApplication().openURL(NSURL(string: url)!)
+                }
             } else {
-                UIApplication.sharedApplication().openURL(NSURL(string: "http://\(url)")!)
+                if UIApplication.sharedApplication().canOpenURL(NSURL(string: "http://\(url)")!){
+                    UIApplication.sharedApplication().openURL(NSURL(string: "http://\(url)")!)
+                }
             }
         }
     }
