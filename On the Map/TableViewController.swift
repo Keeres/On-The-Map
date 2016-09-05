@@ -30,7 +30,6 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
-        print("ASDF")
         tableView.reloadData()
     }
     

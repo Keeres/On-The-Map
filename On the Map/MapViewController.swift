@@ -143,8 +143,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegat
     }
     
     @IBAction func refreshButton(sender: AnyObject) {
-       print(appDelegate.students)
-
         (self.tabBarController as? TabBarController)?.refreshStudentInfomation()
     }
     
