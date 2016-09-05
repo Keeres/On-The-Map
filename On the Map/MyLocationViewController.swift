@@ -25,6 +25,7 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
     var update: Bool?
     var viewControllers: [UIViewController]?
     var geocoder = CLGeocoder()
+    var activityIndicator = UIActivityIndicatorView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +34,6 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
         UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().setBackgroundImage(UIImage(), forBarMetrics: UIBarMetrics.Default)
         
-        
         urlTextField.attributedPlaceholder = NSAttributedString(string:"Enter a Link to Share Here", attributes:[NSForegroundColorAttributeName: UIColor.whiteColor()])
         submitButton.layer.cornerRadius = 10
         
@@ -41,13 +41,13 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
     }
     
     func showMyLocationWithPin(){
+        showActivityIndicatory()
+        
         geocoder.geocodeAddressString(location!, completionHandler: {(placemarks: [CLPlacemark]?, error: NSError?) -> Void in
             
             if error != nil{
-                let alert = UIAlertController(title:nil , message: "Error Finding the Location", preferredStyle: UIAlertControllerStyle.Alert)
-                alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
-                
-                self.presentViewController(alert, animated: true, completion: nil)
+                self.activityIndicator.stopAnimating()
+                AlertView.displayError(self, error: "Error Finding the Location")
             }
             
             if let placemark = placemarks?[0]  {
@@ -71,17 +71,19 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
                 let locationTemp: CLLocationCoordinate2D = CLLocationCoordinate2DMake(self.latitude!, self.longitude!)
                 let region: MKCoordinateRegion = MKCoordinateRegionMake(locationTemp, span)
                 self.mapView.setRegion(region, animated: true)
-               // self.map.showsUserLocation = true
-                
-            }else{
-                let alert = UIAlertController(title: "Alert", message: "Please enter a location", preferredStyle: UIAlertControllerStyle.Alert)
-                alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
-                self.presentViewController(alert, animated: true, completion: nil)
-
             }
-            
+              self.activityIndicator.stopAnimating()
         }
     )}
+    
+    func showActivityIndicatory() {
+        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+        activityIndicator.frame = CGRect(x: 0, y: 0, width: 70, height: 70)
+        activityIndicator.center = self.view.center
+        self.view.addSubview(activityIndicator)
+        activityIndicator.startAnimating()
+        
+    }
     
     func zoomMapBy(delta delta:Double) {
         
@@ -99,113 +101,69 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
         self.mediaURL = urlTextField.text
 
         user = Students(uniqueKey: defaults.objectForKey("uniqueKey") as! String, firstName: defaults.objectForKey("firstName") as! String, lastName: defaults.objectForKey("lastName") as! String, mediaURL:self.mediaURL!, mapString: self.location!, latitude: self.latitude!, longitude: self.longitude!)
-        
-        print(defaults.objectForKey("firstName") as! String)
-        print(user.firstName!)
-    }
-    
-    func postMyLocation(){
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.parse.com/1/classes/StudentLocation")!)
-        request.HTTPMethod = "POST"
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let json : [String: AnyObject] = ["uniqueKey":user!.uniqueKey!, "firstName":user.firstName!, "lastName":user!.lastName!, "mapString":user!.mapString!, "mediaURL":user!.mediaURL!, "latitude":user!.latitude!, "longitude":user!.longitude!]
-        do{
-            let jsonData = try NSJSONSerialization.dataWithJSONObject(json, options: .PrettyPrinted)
-            request.HTTPBody = jsonData
-        }catch{
-            print("error")
-        }
-        
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            if error != nil { // Handle error…
-                return
-            }
-        //    print(NSString(data: data!, encoding: NSUTF8StringEncoding))
-            performUIUpdatesOnMain(){
-                self.updateUserInfo()
-                NSNotificationCenter.defaultCenter().postNotificationName("update", object: nil)
-
-                let presentingViewController = self.presentingViewController
-                
-                self.dismissViewControllerAnimated(true, completion: {
-                    presentingViewController!.dismissViewControllerAnimated(false, completion:nil)
-                    
-                })
-            }
-        }
-        task.resume()
-    }
-    
-    func updateMyLocation(){
-        
-        let urlString = "https://api.parse.com/1/classes/StudentLocation/8ZExGR5uX8"
-        let url = NSURL(string: urlString)
-        let request = NSMutableURLRequest(URL: url!)
-        request.HTTPMethod = "PUT"
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let json : [String: AnyObject] = ["uniqueKey":user!.uniqueKey!, "firstName":user!.firstName!, "lastName":user!.lastName!, "mapString":user!.mapString!, "mediaURL":user!.mediaURL!, "latitude":user!.latitude!, "longitude":user!.longitude!]
-        do{
-            let jsonData = try NSJSONSerialization.dataWithJSONObject(json, options: .PrettyPrinted)
-            request.HTTPBody = jsonData
-        }catch{
-            print("error")
-            let alert = UIAlertController(title:nil , message: "Posting Student Information Failed", preferredStyle: UIAlertControllerStyle.Alert)
-            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
-            
-            self.presentViewController(alert, animated: true, completion: nil)
-        }
-        
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            if error != nil { // Handle error…
-                return
-            }
-         //   print(NSString(data: data!, encoding: NSUTF8StringEncoding))
-            performUIUpdatesOnMain(){
-                self.updateUserInfo()
-                
-                NSNotificationCenter.defaultCenter().postNotificationName("update", object: nil)
-                
-                self.presentingViewController!.presentingViewController!.dismissViewControllerAnimated(false, completion: nil)
-
-            }
-        }
-        task.resume()
     }
     
     func updateUserInfo(){
-       let defaults = NSUserDefaults.standardUserDefaults()
+        let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setDouble(user!.latitude!, forKey: "latitude")
         defaults.setDouble(user!.longitude!, forKey: "longitude")
         defaults.setObject(user!.mapString, forKey: "mapString")
         defaults.setObject(user!.mediaURL, forKey: "mediaURL")
     }
     
+    func postMyLocation(){
+        UdacityClient.sharedInstance().postUserInformation(user.uniqueKey, firstName: user.firstName, lastName: user.lastName, mapString: user.mapString, mediaURL: user.mediaURL, latitude: user.latitude, longitude: user.longitude) {(success, objectId, errorString) in
+
+            if success{
+                performUIUpdatesOnMain(){
+                    self.updateUserInfo()
+                    NSNotificationCenter.defaultCenter().postNotificationName("update", object: nil)
+                    
+                    let presentingViewController = self.presentingViewController
+                    
+                    self.dismissViewControllerAnimated(true, completion: {
+                        presentingViewController!.dismissViewControllerAnimated(false, completion:nil)
+                    })
+                }
+            }else{
+                AlertView.displayError(self, error: errorString!)
+            }
+        }
+    }
+    
+    func updateMyLocation(){
+        UdacityClient.sharedInstance().updateUserInformation(user.uniqueKey, firstName: user.firstName, lastName: user.lastName, mapString: user.mapString, mediaURL: user.mediaURL, latitude: user.latitude, longitude: user.longitude) {(success, errorString) in
+            if success{
+                
+                performUIUpdatesOnMain(){
+                    self.updateUserInfo()
+                    
+                    NSNotificationCenter.defaultCenter().postNotificationName("update", object: nil)
+                    
+                    self.presentingViewController!.presentingViewController!.dismissViewControllerAnimated(false, completion: nil)
+                }
+            }else{
+                AlertView.displayError(self, error: errorString!)
+            }
+        }
+    }
+    
+  
+    
     //MARK: Buttons
     @IBAction func submit(sender: AnyObject) {
         if urlTextField.text!.isEmpty{
-            let alert = UIAlertController(title: "Warning", message: "Please enter a link", preferredStyle: UIAlertControllerStyle.Alert)
-            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
-            self.presentViewController(alert, animated: true, completion: nil)
+            AlertView.displayError(self, error: "Please enter a link")
         }else{
             userInfoSetup()
-
-            let defaults = NSUserDefaults.standardUserDefaults()
-            let objectID = defaults.objectForKey("objectID") as! String
-            
-            if objectID.isEmpty || update == false{
+            if update == false{
                 postMyLocation()
                 print("post")
-            }else{
+            }else if update == true{
                 updateMyLocation()
                 print("update")
+            }else{
+                AlertView.displayError(self, error: "Error Adding Location")
             }
         }
     }

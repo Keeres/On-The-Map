@@ -37,9 +37,7 @@ class AddLocationViewController: UIViewController, UITextFieldDelegate{
     
     @IBAction func findOnMap(sender: AnyObject) {
         if locationText.text!.isEmpty{
-            let alert = UIAlertController(title: "Alert", message: "Please enter a location", preferredStyle: UIAlertControllerStyle.Alert)
-            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
-            self.presentViewController(alert, animated: true, completion: nil)
+            AlertView.displayError(self, error: "Please enter a location")
         }else{
             let controller = self.storyboard?.instantiateViewControllerWithIdentifier("MyLocation") as? MyLocationViewController
             
@@ -70,7 +68,6 @@ class AddLocationViewController: UIViewController, UITextFieldDelegate{
     }
     
     func textFieldDidEndEditing(textField: UITextField) {
-     //   locationText.placeholder = "Enter your location"
         locationText.attributedPlaceholder = NSAttributedString(string:"Enter your location",attributes:[NSForegroundColorAttributeName: UIColor.whiteColor()])
     }
    

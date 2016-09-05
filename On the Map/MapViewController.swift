@@ -10,14 +10,18 @@ import Foundation
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate{
+class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegate{
     
     @IBOutlet weak var mapView: MKMapView!
     var user:Students?
     var uniqueKey:String?
-    var students = [StudentInformation]()
     var addStudent = true
     let keys = ["createdAt", "firstName", "lastName", "latitude", "longitude", "mapString", "mediaURL", "objectId", "uniqueKey", "updatedAt"]
+    var appDelegate: AppDelegate!
+
+    var students: [StudentInformation] {
+        return (UIApplication.sharedApplication().delegate as! AppDelegate).students
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +38,7 @@ class MapViewController: UIViewController, MKMapViewDelegate{
         UdacityClient.sharedInstance().getStudentLocationsRequest(){(success, studentLocations, errorString) in
             if success {
                 self.parseStudentInformation(studentLocations)
+                self.addAnnotations()
             } else {
                 performUIUpdatesOnMain(){
                     AlertView.displayError(self, error: errorString!)
@@ -48,7 +53,6 @@ class MapViewController: UIViewController, MKMapViewDelegate{
             // Checks to see if all required information are present with correct keys
             if Array(dictionary.keys).count == 10{
                 let sortedKeys = Array(dictionary.keys).sort(<)
-                
                 for index in 0...sortedKeys.count-1{
                     if(sortedKeys[index] != keys[index]){
                         
@@ -63,43 +67,42 @@ class MapViewController: UIViewController, MKMapViewDelegate{
             
             if addStudent == true {
                 let student = StudentInformation(studentDictionary: dictionary)
-                students.append(student)
+                let object = UIApplication.sharedApplication().delegate
+                let appDelegate = object as! AppDelegate
+                appDelegate.students.append(student)
             }
             addStudent = true
         }
     }
 
-    
-    func addAnnotations(studentInformation: [[String : AnyObject]]){
+    func addAnnotations(){
         var annotations = [MKAnnotation]()
-
-            for dictionary in studentInformation {
-
+        
+        for student in students{
             // Notice that the float values are being used to create CLLocationDegree values.
             // This is a version of the Double type.
-            let lat = CLLocationDegrees(dictionary["latitude"] as! Double)
-            let long = CLLocationDegrees(dictionary["longitude"] as! Double)
-
+            let lat = CLLocationDegrees(student.latitude)
+            let long = CLLocationDegrees(student.longitude)
+            
             // The lat and long are used to create a CLLocationCoordinates2D instance.
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
-            
-            let first = dictionary["firstName"] as! String
-            let last = dictionary["lastName"] as! String
-            let mediaURL = dictionary["mediaURL"] as! String
-            
+
             // Here we create the annotation and set its coordiate, title, and subtitle properties
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
-            annotation.title = "\(first) \(last)"
-            annotation.subtitle = mediaURL
+            annotation.title = "\(student.firstName) \(student.lastName)"
+            annotation.subtitle = student.mediaURL
             
             // Finally we place the annotation in an array of annotations.
             annotations.append(annotation)
-
+            
         }
-       print( annotations.count)
         self.mapView.addAnnotations(annotations)
-
+        
+        let zoomReference = [annotations[1], annotations[50]]
+        performUIUpdatesOnMain(){
+            self.mapView.showAnnotations(zoomReference, animated: true)
+        }
     }
     
     func updateUserAnnotation(notification: NSNotification){
@@ -112,7 +115,7 @@ class MapViewController: UIViewController, MKMapViewDelegate{
 
         let first = defaults.objectForKey("firstName") as! String
         let last = defaults.objectForKey("lastName") as! String
-        let mediaURL = defaults.objectForKey("MediaURL") as! String
+        let mediaURL = defaults.objectForKey("mediaURL") as! String
 
         // Here we create the annotation and set its coordiate, title, and subtitle properties
         let annotation = MKPointAnnotation()
@@ -120,50 +123,29 @@ class MapViewController: UIViewController, MKMapViewDelegate{
         annotation.title = "\(first) \(last)"
         annotation.subtitle = mediaURL
         
-        self.mapView.addAnnotation(annotation)
+        var annotations = [MKAnnotation]()
+        annotations.append(annotation)
+      //  self.mapView.addAnnotation(annotation)
+        performUIUpdatesOnMain(){
+            self.mapView.showAnnotations(annotations, animated: true)
+        }
+
     }
     
     // MARK: Buttons
     
     @IBAction func addLocation(sender: AnyObject) {
-        UdacityClient.sharedInstance().queryForExistingData(uniqueKey!)  {(sucess, objectID, errorString) in
-            
-            if sucess == true{
-                performUIUpdatesOnMain()
-                    {
-                        let defaults = NSUserDefaults.standardUserDefaults()
-                        defaults.setObject(objectID, forKey: "objectID")
-                        
-                        let alert = UIAlertController(title:nil , message: "You Already Posted a Student Location. Would you like to Overwrite Your Current Location", preferredStyle: UIAlertControllerStyle.Alert)
-                        alert.addAction(UIAlertAction(title: "Overwite", style: UIAlertActionStyle.Default, handler: self.presentAddLocation))
-                        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Default, handler: nil))
-                        
-                        self.presentViewController(alert, animated: true, completion: nil)
-                }
-            }else{
-                let addLocationController = self.storyboard!.instantiateViewControllerWithIdentifier("addLocationView") as! AddLocationViewController
-                
-                self.modalTransitionStyle = UIModalTransitionStyle.CoverVertical
-                addLocationController.modalPresentationStyle = .OverFullScreen
-                addLocationController.update = false
-                self.presentViewController(addLocationController, animated: true, completion: nil)
-            }
-        }
+        (self.tabBarController as? TabBarController)?.addLocation()
     }
     
+    @IBAction func Logout(sender: UIBarButtonItem) {
+       self.dismissViewControllerAnimated(true, completion: nil)
+    }
     
-   // @IBAction func RefreshButton(sender: AnyObject) {
-        //  self.getStudentLocationsRequest()
+    @IBAction func refreshButton(sender: AnyObject) {
+       print(appDelegate.students)
 
-    //}
-    
-    func presentAddLocation(actionTarget: UIAlertAction){
-        let addLocationController = self.storyboard!.instantiateViewControllerWithIdentifier("addLocationView") as! AddLocationViewController
-        
-        self.modalTransitionStyle = UIModalTransitionStyle.CoverVertical
-        addLocationController.modalPresentationStyle = .OverFullScreen
-        addLocationController.update = true
-        self.presentViewController(addLocationController, animated: true, completion: nil)
+        (self.tabBarController as? TabBarController)?.refreshStudentInfomation()
     }
     
     // MARK: - MKMapViewDelegate
@@ -193,9 +175,12 @@ class MapViewController: UIViewController, MKMapViewDelegate{
     // to the URL specified in the annotationViews subtitle property.
     func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         if control == view.rightCalloutAccessoryView {
-            let app = UIApplication.sharedApplication()
             if let toOpen = view.annotation?.subtitle! {
-                app.openURL(NSURL(string: toOpen)!)
+                if toOpen.hasPrefix("http://") {
+                    UIApplication.sharedApplication().openURL(NSURL(string: toOpen)!)
+                } else {
+                    UIApplication.sharedApplication().openURL(NSURL(string: "http://\(toOpen)")!)
+                }
             }
         }
     }

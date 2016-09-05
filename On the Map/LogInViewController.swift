@@ -49,7 +49,19 @@ class LoginViewController: UIViewController, UITextFieldDelegate{
                         
                         //  print(defaults.objectForKey("firstName") as! String)
                         performUIUpdatesOnMain(){
-                            self.performSegueWithIdentifier("MapView", sender: nil)
+                        
+                            let controller = self.storyboard?.instantiateViewControllerWithIdentifier("TabBar") as? TabBarController
+                            let transition = CATransition()
+                            transition.duration = 0.4
+                            transition.type = kCATransitionPush
+                            transition.subtype = kCATransitionFromRight
+                            transition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+
+                            self.view.window!.layer.addAnimation(transition, forKey: nil)
+                        //    controller?.modalPresentationStyle = .None
+                        self.navigationController?.presentViewController(controller!, animated: true, completion: nil)
+
+                            //self.performSegueWithIdentifier("MapView", sender: nil)
                         }
                     }else{
                         AlertView.displayError(self, error: errorString!)
