@@ -16,7 +16,7 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var urlTextField: UITextField!
     @IBOutlet weak var submitButton: UIButton!
-    var user:Students!
+    var user:StudentInformation!
     
     var location:String?
     var mediaURL:String?
@@ -99,8 +99,9 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
     func userInfoSetup(){
         let defaults = NSUserDefaults.standardUserDefaults()
         self.mediaURL = urlTextField.text
+        let dictionary : [String:AnyObject] = ["uniqueKey":defaults.objectForKey("uniqueKey")!, "firstName":defaults.objectForKey("firstName")!, "lastName":defaults.objectForKey("lastName")!, "mediaURL":self.mediaURL!, "mapString":self.location!, "latitude":self.latitude!, "longitude":self.longitude!]
 
-        user = Students(uniqueKey: defaults.objectForKey("uniqueKey") as! String, firstName: defaults.objectForKey("firstName") as! String, lastName: defaults.objectForKey("lastName") as! String, mediaURL:self.mediaURL!, mapString: self.location!, latitude: self.latitude!, longitude: self.longitude!)
+        user = StudentInformation(studentDictionary: dictionary)
     }
     
     func updateUserInfo(){
@@ -117,6 +118,7 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
             if success{
                 performUIUpdatesOnMain(){
                     self.updateUserInfo()
+
                     NSNotificationCenter.defaultCenter().postNotificationName("update", object: nil)
                     
                     let presentingViewController = self.presentingViewController
@@ -132,7 +134,7 @@ class MyLocationViewController: UIViewController, MKMapViewDelegate, UITextField
     }
     
     func updateMyLocation(){
-        UdacityClient.sharedInstance().updateUserInformation(user.uniqueKey, firstName: user.firstName, lastName: user.lastName, mapString: user.mapString, mediaURL: user.mediaURL, latitude: user.latitude, longitude: user.longitude) {(success, errorString) in
+        UdacityClient.sharedInstance().updateUserInformation(self.user.uniqueKey, firstName: self.user.firstName, lastName: self.user.lastName, mapString: self.user.mapString, mediaURL: self.user.mediaURL, latitude: self.user.latitude, longitude: self.user.longitude) {(success, errorString) in
             if success{
                 
                 performUIUpdatesOnMain(){

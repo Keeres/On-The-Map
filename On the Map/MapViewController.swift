@@ -13,15 +13,9 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegate{
     
     @IBOutlet weak var mapView: MKMapView!
-    var user:Students?
     var uniqueKey:String?
     var addStudent = true
     let keys = ["createdAt", "firstName", "lastName", "latitude", "longitude", "mapString", "mediaURL", "objectId", "uniqueKey", "updatedAt"]
-    var appDelegate: AppDelegate!
-
-    var students: [StudentInformation] {
-        return (UIApplication.sharedApplication().delegate as! AppDelegate).students
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,9 +61,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegat
             
             if addStudent == true {
                 let student = StudentInformation(studentDictionary: dictionary)
-                let object = UIApplication.sharedApplication().delegate
-                let appDelegate = object as! AppDelegate
-                appDelegate.students.append(student)
+                Students.students?.append(student)
             }
             addStudent = true
         }
@@ -78,7 +70,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegat
     func addAnnotations(){
         var annotations = [MKAnnotation]()
         
-        for student in students{
+        for student in Students.students!{
             // Notice that the float values are being used to create CLLocationDegree values.
             // This is a version of the Double type.
             let lat = CLLocationDegrees(student.latitude)
@@ -125,10 +117,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegat
         
         var annotations = [MKAnnotation]()
         annotations.append(annotation)
-      //  self.mapView.addAnnotation(annotation)
-        performUIUpdatesOnMain(){
-            self.mapView.showAnnotations(annotations, animated: true)
-        }
+        self.mapView.addAnnotation(annotation)
+      //  performUIUpdatesOnMain(){
+        //    self.mapView.showAnnotations(annotations, animated: true)
+        //}
 
     }
     
@@ -143,6 +135,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegat
     }
     
     @IBAction func refreshButton(sender: AnyObject) {
+       print( Students.students?.count)
         (self.tabBarController as? TabBarController)?.refreshStudentInfomation()
     }
     
