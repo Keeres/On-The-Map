@@ -39,8 +39,8 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     @IBAction func refreshButton(sender: AnyObject) {
+        Students.students?.removeAll()
         (self.tabBarController as? TabBarController)?.refreshStudentInfomation()
-        tableView.reloadData()
     }
   
     // MARK: Table Delgate Functions

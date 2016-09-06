@@ -74,4 +74,20 @@ class TabBarController: UITabBarController, UIAlertViewDelegate  {
 
         controller.getStudentLocations()
     }
+    
+    func refreshTable(){
+        let mapController = (self.viewControllers![0] as! UINavigationController).topViewController as! MapViewController
+        let tableController = (self.viewControllers![1] as! UINavigationController).topViewController as! TableViewController
+        
+        UdacityClient.sharedInstance().getStudentLocationsRequest(){(success, studentLocations, errorString) in
+            if success {
+                mapController.parseStudentInformation(studentLocations)
+                tableController.tableView.reloadData()
+            } else {
+                performUIUpdatesOnMain(){
+                    AlertView.displayError(self, error: errorString!)
+                }
+            }
+        }
+    }
 }

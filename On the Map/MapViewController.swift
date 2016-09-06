@@ -135,7 +135,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIAlertViewDelegat
     }
     
     @IBAction func refreshButton(sender: AnyObject) {
-       print( Students.students?.count)
+        Students.students?.removeAll()
         (self.tabBarController as? TabBarController)?.refreshStudentInfomation()
     }
     
