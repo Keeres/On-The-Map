@@ -6,7 +6,7 @@ Nanodegree students, with custom messages about themselves or their learning exp
 ## Installation
 
 1. Clone or download the repository to your computer.
-2. Open the project folder and open Pitch Perfect.xcodeproj using XCode
+2. Open the project folder and open On The Map.xcodeproj using XCode
 3. Run using either an iPhone device or simulator. Be sure the XCode is up to date
 
 ## Usage
